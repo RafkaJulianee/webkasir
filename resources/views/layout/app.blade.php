@@ -27,6 +27,10 @@
                     @endif
                 </ul>
                 
+                <form class="d-flex me-3" action="" method="GET">
+                    <input class="form-control" type="search" name="search" id="globalSearchInput" placeholder="Ketik untuk mencari..." aria-label="Search" value="{{ request('search') }}" autocomplete="off">
+                </form>
+
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
@@ -58,5 +62,64 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('globalSearchInput');
+            
+            // Cek apakah halaman ini memiliki tableContainer untuk di-update
+            if (searchInput) {
+                let debounceTimer;
+                let abortController = null;
+
+                searchInput.addEventListener('input', function() {
+                    const query = this.value;
+                    const tableContainer = document.getElementById('tableContainer');
+                    
+                    if (!tableContainer) return; // Jika tidak ada tabel, abaikan
+
+                    // Bersihkan timer sebelumnya (Debounce)
+                    clearTimeout(debounceTimer);
+                    
+                    // Batalkan request AJAX sebelumnya jika belum selesai (mencegah race condition)
+                    if (abortController) {
+                        abortController.abort();
+                    }
+                    
+                    abortController = new AbortController();
+                    const signal = abortController.signal;
+
+                    // Tunggu 250ms setelah user selesai mengetik sebelum melakukan request
+                    debounceTimer = setTimeout(() => {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('search', query);
+
+                        fetch(url, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            signal: signal
+                        })
+                        .then(response => response.text())
+                        .then(html => {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+                            const newTable = doc.getElementById('tableContainer');
+                            if (newTable) {
+                                tableContainer.innerHTML = newTable.innerHTML;
+                                // Perbarui URL di address bar tanpa reload halaman
+                                window.history.replaceState({}, '', url);
+                            }
+                        })
+                        .catch(error => {
+                            // Abaikan error jika itu disebabkan oleh AbortController
+                            if (error.name !== 'AbortError') {
+                                console.error('Error fetching data:', error);
+                            }
+                        });
+                    }, 250); 
+                });
+            }
+        });
+    </script>
 </body>
 </html>

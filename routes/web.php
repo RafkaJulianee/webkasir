@@ -26,12 +26,12 @@ Route::post('/login', [AuthController::class, 'authenticate']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Rute untuk Admin (role_id = 1)
-Route::middleware(['auth', 'role:1'])->group(function () {
-    Route::resource('/admin/kategori', KategoriController::class);
-    Route::resource('/admin/produk', ProdukController::class); 
+Route::middleware(['auth', 'role:1'])->prefix('admin')->group(function () {
+    Route::resource('kategori', KategoriController::class);
+    Route::resource('produk', ProdukController::class); 
 });
 
 // Rute untuk User/Kasir (role_id = 2)
-Route::middleware(['auth', 'role:2'])->group(function () {
-    Route::get('/user/produk', [UserProdukController::class, 'index']);
+Route::middleware(['auth', 'role:2'])->prefix('user')->group(function () {
+    Route::get('produk', [UserProdukController::class, 'index']);
 });

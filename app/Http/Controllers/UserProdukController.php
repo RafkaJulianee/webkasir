@@ -6,8 +6,15 @@ use Illuminate\Http\Request;
 
 class UserProdukController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return "Akses Aman! Selamat datang Kasir. Halaman daftar produk ada di sini.";
+        $query = \App\Models\Produk::with('kategori');
+
+        if ($request->has('search')) {
+            $query->where('nama_produk', 'like', '%' . $request->search . '%');
+        }
+
+        $produk = $query->paginate(10)->withQueryString();
+        return view('user.produk.index', compact('produk'));
     }
 }

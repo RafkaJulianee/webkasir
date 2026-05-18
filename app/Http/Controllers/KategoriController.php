@@ -8,9 +8,15 @@ use Illuminate\Http\Request;
 class KategoriController extends Controller
 {
     // Menampilkan daftar kategori
-    public function index()
+    public function index(Request $request)
     {
-        $kategori = Kategori::all();
+        $query = Kategori::query();
+
+        if ($request->has('search')) {
+            $query->where('nama_kategori', 'like', '%' . $request->search . '%');
+        }
+
+        $kategori = $query->get();
         return view('kategori.index', compact('kategori'));
     }
 

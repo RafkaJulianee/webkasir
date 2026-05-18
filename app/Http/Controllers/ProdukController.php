@@ -5,14 +5,21 @@ namespace App\Http\Controllers;
 use App\Models\Produk;
 use App\Models\Kategori;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProdukController extends Controller
 {
-    // Menampilkan daftar seluruh produk
-    public function index()
+    public function index(Request $request)
     {
-        // Mengambil semua produk beserta data kategori yang berelasi
-        $produk = Produk::with('kategori')->get();
+        $query = Produk::with('kategori');
+
+        // Jika ada input pencarian
+        if ($request->has('search')) {
+            $query->where('nama_produk', 'like', '%' . $request->search . '%');
+        }
+
+        // Mengambil data dengan pagination 10 per halaman, dan menyertakan query pencarian di URL
+        $produk = $query->paginate(10)->withQueryString();
         return view('produk.index', compact('produk'));
     }
 
@@ -33,9 +40,16 @@ class ProdukController extends Controller
             'kategori_id' => 'required|exists:kategori,id',
             'harga' => 'required|numeric|min:0',
             'stok' => 'required|integer|min:0',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        Produk::create($request->all());
+        $data = $request->all();
+
+        if ($request->hasFile('gambar')) {
+            $data['gambar'] = $request->file('gambar')->store('produk', 'public');
+        }
+
+        Produk::create($data);
 
         return redirect()->route('produk.index')->with('success', 'Produk berhasil ditambahkan!');
     }
@@ -56,10 +70,22 @@ class ProdukController extends Controller
             'kategori_id' => 'required|exists:kategori,id',
             'harga' => 'required|numeric|min:0',
             'stok' => 'required|integer|min:0',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $produk = Produk::findOrFail($id);
-        $produk->update($request->all());
+        $data = $request->all();
+
+        if ($request->hasFile('gambar')) {
+            // Hapus gambar lama jika ada
+            if ($produk->gambar && Storage::disk('public')->exists($produk->gambar)) {
+                Storage::disk('public')->delete($produk->gambar);
+            }
+            // Simpan gambar baru
+            $data['gambar'] = $request->file('gambar')->store('produk', 'public');
+        }
+
+        $produk->update($data);
 
         return redirect()->route('produk.index')->with('success', 'Produk berhasil diperbarui!');
     }
@@ -68,6 +94,12 @@ class ProdukController extends Controller
     public function destroy($id)
     {
         $produk = Produk::findOrFail($id);
+
+        // Hapus gambar dari storage jika ada
+        if ($produk->gambar && Storage::disk('public')->exists($produk->gambar)) {
+            Storage::disk('public')->delete($produk->gambar);
+        }
+
         $produk->delete();
 
         return redirect()->route('produk.index')->with('success', 'Produk berhasil dihapus!');
