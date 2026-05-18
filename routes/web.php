@@ -1,0 +1,37 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Auth;
+
+// Import Controller Baru
+use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\UserProdukController;
+
+Route::get('/', function () {
+    if (Auth::check()) {
+        if (Auth::user()->role_id == 1) {
+            return redirect('/admin/produk');
+        } else {
+            return redirect('/user/produk');
+        }
+    }
+    return redirect('/login');
+});
+
+// Route Authentication
+Route::get('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/login', [AuthController::class, 'authenticate']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Rute untuk Admin (role_id = 1)
+Route::middleware(['auth', 'role:1'])->group(function () {
+    Route::resource('/admin/kategori', KategoriController::class);
+    Route::resource('/admin/produk', ProdukController::class); 
+});
+
+// Rute untuk User/Kasir (role_id = 2)
+Route::middleware(['auth', 'role:2'])->group(function () {
+    Route::get('/user/produk', [UserProdukController::class, 'index']);
+});
