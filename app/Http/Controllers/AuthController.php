@@ -7,9 +7,10 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    // Menampilkan form login
+    // Menampilkan halaman form login
     public function login()
     {
+        // Redirect user yang sudah login ke halaman sesuai rolenya
         if (Auth::check()) {
             if (Auth::user()->role_id == 1) {
                 return redirect('/admin/produk');
@@ -20,37 +21,36 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    // Memproses data login
+    // Memproses permintaan login dari user
     public function authenticate(Request $request)
     {
-        // Validasi input
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        // Cek kecocokan email dan password
+        // Autentikasi dan pengecekan role user
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            // Cek role_id user yang login
-            if (Auth::user()->role_id == 1) { // 1 = Admin
-                return redirect()->intended('/admin/produk'); // Arahkan ke rute admin
-            } else { // 2 = User
-                return redirect()->intended('/user/produk'); // Arahkan ke rute user
+            if (Auth::user()->role_id == 1) { 
+                return redirect()->intended('/admin/produk');
+            } else { 
+                return redirect()->intended('/user/produk');
             }
         }
 
-        // Jika gagal login
+        // Kembalikan ke halaman login jika autentikasi gagal
         return back()->withErrors([
             'email' => 'Email atau password yang Anda masukkan salah.',
         ])->onlyInput('email');
     }
 
-    // Memproses logout
+    // Mengakhiri sesi login (logout)
     public function logout(Request $request)
     {
         Auth::logout();
+        
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

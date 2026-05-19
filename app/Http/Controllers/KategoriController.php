@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class KategoriController extends Controller
 {
-    // Menampilkan daftar kategori
+    // Menampilkan daftar kategori dengan fitur pencarian dan pagination
     public function index(Request $request)
     {
         $query = Kategori::query();
@@ -16,17 +16,18 @@ class KategoriController extends Controller
             $query->where('nama_kategori', 'like', '%' . $request->search . '%');
         }
 
-        $kategori = $query->get();
+        // Gunakan pagination (5 data per halaman)
+        $kategori = $query->paginate(5)->withQueryString();
         return view('kategori.index', compact('kategori'));
     }
 
-    // Menampilkan form tambah kategori
+    // Menampilkan form untuk menambahkan kategori baru
     public function create()
     {
         return view('kategori.create');
     }
 
-    // Menyimpan data kategori baru
+    // Menyimpan data kategori baru ke database
     public function store(Request $request)
     {
         $request->validate([
@@ -38,14 +39,14 @@ class KategoriController extends Controller
         return redirect()->route('kategori.index')->with('success', 'Kategori berhasil ditambahkan!');
     }
 
-    // Menampilkan form edit kategori
+    // Menampilkan form untuk mengubah data kategori
     public function edit($id)
     {
         $kategori = Kategori::findOrFail($id);
         return view('kategori.edit', compact('kategori'));
     }
 
-    // Menyimpan perubahan data kategori
+    // Menyimpan perubahan data kategori ke database
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -58,7 +59,7 @@ class KategoriController extends Controller
         return redirect()->route('kategori.index')->with('success', 'Kategori berhasil diperbarui!');
     }
 
-    // Menghapus data kategori
+    // Menghapus data kategori dari database
     public function destroy($id)
     {
         $kategori = Kategori::findOrFail($id);
