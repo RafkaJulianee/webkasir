@@ -35,7 +35,7 @@
     <div class="offcanvas-md offcanvas-start sidebar d-flex flex-column py-4" tabindex="-1" id="sidebarMenu">
         <div class="px-4 mb-4 d-flex align-items-center justify-content-between">
             <div>
-                <i class="bi bi-layers-fill fs-3 text-primary me-2"></i>
+                <i class="bi bi-cart-fill fs-3 text-primary me-2"></i>
                 <span class="fs-4 fw-bold" style="color: #1e2022;">MyKasir<span class="text-primary">.</span></span>
             </div>
             <button type="button" class="btn-close d-md-none" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu"></button>
@@ -89,11 +89,13 @@
                     <i class="bi bi-list fs-5"></i>
                 </button>
                 
-                <!-- Search -->
+                <!-- Search (hidden on dashboard) -->
+                @if(!request()->is('admin/dashboard'))
                 <div class="position-relative flex-grow-1" style="max-width: 350px;">
                     <i class="bi bi-search search-icon"></i>
                     <input type="text" id="globalSearchInput" value="{{ request('search') }}" class="form-control form-control-lg search-input fs-6 py-2" placeholder="Search..." autocomplete="off">
                 </div>
+                @endif
             </div>
             
             <!-- Profile -->

@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="fw-bold mb-0" style="color: #1e2022;">Daftar Produk (Kasir)</h3>
+    <h3 class="fw-bold mb-0" style="color: #1e2022;">Daftar Produk (User)</h3>
     <div>
         <select id="kategoriFilter" class="form-select bg-white border shadow-sm fw-semibold px-3 py-2" style="border-radius: 10px; font-size: 0.9rem; min-width: 160px; cursor: pointer; color: #4a5568;">
             <option value="">Semua Kategori</option>

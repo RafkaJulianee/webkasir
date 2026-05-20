@@ -19,7 +19,6 @@ class User extends Authenticatable
 
     /**
      * Relasi ke model Role
-     * User -> belongsTo (Role)
      */
     public function role()
     {

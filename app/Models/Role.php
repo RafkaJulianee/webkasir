@@ -17,10 +17,6 @@ class Role extends Model
         'nama_role',
     ];
 
-    /**
-     * Relasi ke model User
-     * Role -> hasMany (User)
-     */
     public function users()
     {
         return $this->hasMany(User::class);

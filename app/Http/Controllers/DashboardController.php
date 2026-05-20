@@ -14,12 +14,12 @@ class DashboardController extends Controller
         // Hitung total data masing-masing entitas untuk ditampilkan di kartu statistik
         $totalProduk = Produk::count();
         $totalKategori = Kategori::count();
-        $totalKasir = User::where('role_id', 2)->count(); // Hanya hitung user dengan role Kasir
+        $totalUser = User::where('role_id', 2)->count(); // Hanya hitung user dengan role User
 
         return view('admin.dashboard.index', compact(
             'totalProduk',
             'totalKategori',
-            'totalKasir'
+            'totalUser'
         ));
     }
 }
